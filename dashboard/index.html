@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Launch Radar — which pre-token protocol is worth farming next</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap">
+    <p class="kicker">Token launch radar · snapshot 14 Nov 2026 · DefiLlama protocols</p>
+    <h1>Launch Radar</h1>
+    <p class="deck">Which pre-token protocol is worth farming next — and what to do about it. Every protocol below records no token. Each is ranked by an implied value the model derives from the snapshot's own figures, never from a hand-kept list of names.</p>
+    <dl class="stats" id="stats"></dl>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="model" aria-label="How the value is worked out">
+    <h2>The value model</h2>
+    <p class="formula">implied value = TVL × category multiple × growth × maturity × launch odds</p>
+    <div class="factors">
+      <div class="factor"><h3>Category multiple</h3><p>The median mcap&thinsp;/&thinsp;TVL of the live-token protocols in the same category — the market's own pricing, read from this snapshot. Categories with fewer than 3 live comps use the global median.</p></div>
+      <div class="factor"><h3>Growth</h3><p>The protocol's 7-day TVL change, clamped to −60%…+120%, at half weight. A protocol shrinking fast is worth less; one growing fast is worth more.</p></div>
+      <div class="factor"><h3>Maturity</h3><p>0.6 + age up to 3 years × 0.4. A protocol that has run for years has a record; a brand-new one has none.</p></div>
+      <div class="factor"><h3>Launch odds</h3><p>Among protocols of the same age band, the share that already record a token — the peers' own age curve, read from this snapshot and damped to 0.5 + 0.5 × rate.</p></div>
+    </div>
+    <details class="sandbox">
+      <summary>Model sandbox — move the constants and watch the board re-rank</summary>
+      <div class="sliders">
+        <label>Multiple scale <input type="range" id="sb-mult" min="50" max="200" value="100"><span id="sb-mult-v">1.00×</span></label>
+        <label>Growth weight <input type="range" id="sb-growth" min="0" max="100" value="50"><span id="sb-growth-v">0.50</span></label>
+        <label>Launch damp <input type="range" id="sb-launch" min="0" max="100" value="50"><span id="sb-launch-v">0.50</span></label>
+      </div>
+      <p class="note">The sandbox re-ranks the board in your browser only. The submitted board.json keeps the stated constants.</p>
+    </details>
+  </section>
+
+  <section class="filters" aria-label="Filter the board">
+    <input id="q" type="search" placeholder="Search name or slug…" autocomplete="off">
+    <select id="f-cat" aria-label="Category"><option value="">All categories</option></select>
+    <select id="f-chain" aria-label="Chain"><option value="">All chains</option></select>
+    <select id="f-tvl" aria-label="Minimum TVL">
+      <option value="0">Any TVL</option>
+      <option value="50000000">TVL ≥ $50M</option>
+      <option value="100000000">TVL ≥ $100M</option>
+      <option value="500000000">TVL ≥ $500M</option>
+      <option value="1000000000">TVL ≥ $1B</option>
+    </select>
+    <label class="check"><input type="checkbox" id="f-watch"> Watchlist only</label>
+    <select id="f-sort" aria-label="Sort by">
+      <option value="rank">Sort: implied value</option>
+      <option value="tvl">Sort: TVL</option>
+      <option value="growth">Sort: 7-day growth</option>
+      <option value="age">Sort: age</option>
+      <option value="name">Sort: name</option>
+    </select>
+    <p class="count" id="count"></p>
+  </section>
+
+  <section aria-label="The board">
+    <table class="board" id="board">
+      <thead>
+        <tr>
+          <th class="num">#</th><th>Protocol</th><th>Category</th><th>Chains</th>
+          <th class="num">TVL</th><th class="num">7d</th><th class="num">Age</th>
+          <th class="num">Launch</th><th class="num">Implied value</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="hint">Click any row for its model breakdown and farm plan.</p>
+  </section>
+
+  <section class="detail" id="detail" hidden aria-label="Protocol detail"></section>
+
+  <section class="calibration" aria-label="Category calibration">
+    <h2>Where the multiples come from</h2>
+    <p>Each category's multiple is the median market-cap-to-TVL ratio of its live-token protocols in this snapshot. The table below is the calibration the model computed — not a claim, a count.</p>
+    <table class="small" id="calib">
+      <thead><tr><th>Category</th><th class="num">Multiple</th><th class="num">Live comps</th></tr></thead>
+      <tbody id="calib-rows"></tbody>
+    </table>
+    <h3>Launch odds by age band</h3>
+    <p>Share of protocols in each age band that already record a token:</p>
+    <table class="small" id="curve">
+      <thead><tr><th>Age band</th><th class="num">Token rate</th><th class="num">Protocols</th></tr></thead>
+      <tbody id="curve-rows"></tbody>
+    </table>
+  </section>
+
+  <section class="live" aria-label="Live-token reference">
+    <h2>Already trading — the market's own values</h2>
+    <p>These protocols already have a token, so the board never ranks them. They are shown here at the market's own values, as the comparables the multiples are calibrated from.</p>
+    <table class="small" id="live-table">
+      <thead><tr><th>Protocol</th><th>Category</th><th class="num">TVL</th><th class="num">Market cap</th><th class="num">mcap / TVL</th></tr></thead>
+      <tbody id="live-rows"></tbody>
+    </table>
+  </section>
+
+  <footer>
+    <h2>Method and limits</h2>
+    <p>The snapshot is frozen: 758 protocols at or above $5M of TVL, fetched from DefiLlama on 14 November 2026. The board ranks 198 of them — every protocol that records no token and is not an exchange, a versioned pool, or a wrapped, staked or bridged product — including all 40 on the watchlist. A protocol is called pre-token only because its record carries no token; it may still have one its record does not carry. The implied value is this entry's own claim, never make.fun's, and it is not a prediction that a token will be issued or when. Farm plans are starting points, not financial advice: check the protocol's own page before sending funds anywhere.</p>
+    <p class="credit">Launch Radar · model launch-radar-1 · built from the sealed snapshot, no network at run time.</p>
+  </footer>
+</main>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
